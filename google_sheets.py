@@ -1,12 +1,23 @@
+import os
+import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import matplotlib.pyplot as plt
 import tempfile
 
-# Configura l'accesso al foglio Google
+# Definisci gli scope per accedere a Google Sheets e Drive
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credenziali_google.json", scope)
+
+# Prendi il JSON delle credenziali dalla variabile d'ambiente e convertilo in dict
+creds_json_str = os.environ.get('GOOGLE_CREDENTIALS')
+if not creds_json_str:
+    raise Exception("Variabile d'ambiente GOOGLE_CREDENTIALS mancante")
+
+creds_dict = json.loads(creds_json_str)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+
+# Autorizza e apri il foglio di lavoro
 client = gspread.authorize(creds)
 sheet = client.open("Spese Familiari").worksheet("Spese")
 
@@ -34,9 +45,6 @@ def genera_riepilogo():
     return testo
 
 def genera_grafico():
-    import matplotlib.pyplot as plt
-    import tempfile
-
     records = sheet.get_all_records()
     utenti = set(r['Utente'] for r in records)
     dati = {u: 0 for u in utenti}
