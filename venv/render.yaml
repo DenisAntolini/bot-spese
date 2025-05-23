@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: bot-spese-familiari
+    runtime: python
+    plan: free
+    buildCommand: ""
+    startCommand: python bot_spese.py
